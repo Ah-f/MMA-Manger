@@ -65,6 +65,12 @@ namespace MMAManager.Models
         [SerializeField] private int popularity;      // 인기도 (0-100)
         #endregion
 
+        #region Appearance
+        [Header("Appearance")]
+        [SerializeField] private int appearanceSeed;
+        [SerializeField] private int skinToneIndex;
+        #endregion
+
         #region Traits & Skills
         [Header("Traits")]
         [SerializeField] private FighterTrait[] traits;
@@ -105,7 +111,22 @@ namespace MMAManager.Models
         public int Wins => wins;
         public int Losses => losses;
         public int Draws => draws;
+        public int KnockoutWins => knockoutWins;
+        public int SubmissionWins => submissionWins;
+        public int DecisionWins => decisionWins;
         public int TotalFights => wins + losses + draws;
+
+        // Appearance
+        public int AppearanceSeed => appearanceSeed;
+        public int SkinToneIndex => skinToneIndex;
+
+        // Contract
+        public int ContractLength => contractLength;
+        public int MonthlySalary => monthlySalary;
+        public int WinBonus => winBonus;
+
+        // Style
+        public FightingStyle PreferredStyle => preferredStyle;
         #endregion
 
         #region Constructors
@@ -145,6 +166,9 @@ namespace MMAManager.Models
             winBonus = 1000;
             popularity = 20;
             preferredStyle = FightingStyle.Balanced;
+
+            appearanceSeed = Guid.NewGuid().GetHashCode();
+            skinToneIndex = Math.Abs(appearanceSeed) % 8;
         }
 
         public void RandomizeStats()
@@ -291,17 +315,14 @@ namespace MMAManager.Models
     #region Enums
     public enum WeightClass
     {
-        Atomweight,      // 105 lbs (47.6 kg)
-        Strawweight,     // 115 lbs (52.2 kg)
-        Flyweight,       // 125 lbs (56.7 kg)
-        Bantamweight,    // 135 lbs (61.2 kg)
-        Featherweight,   // 145 lbs (65.8 kg)
-        Lightweight,     // 155 lbs (70.3 kg)
-        Welterweight,    // 170 lbs (77.1 kg)
-        Middleweight,    // 185 lbs (83.9 kg)
-        LightHeavyweight,// 205 lbs (93.0 kg)
-        Cruiserweight,   // 225 lbs (102.1 kg)
-        Heavyweight      // 265 lbs (120.2 kg)
+        Flyweight,        // 115-125 lbs (52.2-56.7 kg)
+        Bantamweight,     // 125-135 lbs (56.7-61.2 kg)
+        Featherweight,    // 135-145 lbs (61.2-65.8 kg)
+        Lightweight,      // 145-155 lbs (65.8-70.3 kg)
+        Welterweight,     // 155-170 lbs (70.3-77.1 kg)
+        Middleweight,     // 170-185 lbs (77.1-83.9 kg)
+        LightHeavyweight, // 185-205 lbs (83.9-93.0 kg)
+        Heavyweight       // 205-265 lbs (93.0-120.2 kg)
     }
 
     public enum StatType

@@ -1,5 +1,7 @@
+using System.Collections;
 using UnityEngine;
 using MMAManager.Models;
+using MMAManager.Systems;
 using MMAManager.UI;
 
 namespace MMAManager.Combat
@@ -17,6 +19,7 @@ namespace MMAManager.Combat
         [Header("Fight Settings")]
         public bool autoStartFight = true;
         public float fighterSpacing = 3.5f;
+        public bool useUMA = true; // UMA 캐릭터 사용 여부
 
         private FighterAgent agent1;
         private FighterAgent agent2;
@@ -38,10 +41,16 @@ namespace MMAManager.Combat
                 gameObject.AddComponent<CombatSoundManager>();
 
             EnsureFighterData();
-            InitializeFight();
 
-            if (autoStartFight)
-                StartFight();
+            // UMA 사용 시 비동기 생성, 아니면 기존 방식
+            if (useUMA && (fighter1Obj == null || fighter2Obj == null))
+                StartCoroutine(InitializeFightWithUMA());
+            else
+            {
+                InitializeFight();
+                if (autoStartFight)
+                    StartFight();
+            }
         }
 
         private void EnsureFighterData()
@@ -56,6 +65,71 @@ namespace MMAManager.Combat
                 fighter2 = new Fighter("Mike", "Johnson", 30, WeightClass.Middleweight);
                 fighter2.RandomizeStats();
             }
+        }
+
+        /// <summary>
+        /// UMA로 파이터 3D 오브젝트를 생성한 후 전투 초기화
+        /// </summary>
+        private IEnumerator InitializeFightWithUMA()
+        {
+            var generator = UMAFighterGenerator.Instance;
+            if (generator == null)
+            {
+                Debug.LogWarning("[Combat3DManager] UMAFighterGenerator not found, falling back to prefab mode");
+                InitializeFight();
+                if (autoStartFight) StartFight();
+                yield break;
+            }
+
+            int readyCount = 0;
+            Vector3 pos1 = new Vector3(-fighterSpacing / 2f, 0f, 0f);
+            Vector3 pos2 = new Vector3(fighterSpacing / 2f, 0f, 0f);
+
+            // Generate fighter 1 via UMA
+            if (fighter1Obj == null)
+            {
+                fighter1Obj = generator.GenerateFighterObject(
+                    fighter1, pos1, Quaternion.identity,
+                    (go) => readyCount++
+                );
+            }
+            else
+            {
+                readyCount++;
+            }
+
+            // Generate fighter 2 via UMA
+            if (fighter2Obj == null)
+            {
+                fighter2Obj = generator.GenerateFighterObject(
+                    fighter2, pos2, Quaternion.identity,
+                    (go) => readyCount++
+                );
+            }
+            else
+            {
+                readyCount++;
+            }
+
+            // Wait for both UMA characters to finish building (max 10 seconds)
+            float timeout = 10f;
+            while (readyCount < 2 && timeout > 0)
+            {
+                timeout -= Time.deltaTime;
+                yield return null;
+            }
+
+            if (readyCount < 2)
+            {
+                Debug.LogError("[Combat3DManager] UMA character build timeout!");
+                yield break;
+            }
+
+            Debug.Log("[Combat3DManager] UMA fighters ready!");
+
+            InitializeFight();
+            if (autoStartFight)
+                StartFight();
         }
 
         public void InitializeFight()

@@ -47,7 +47,7 @@ namespace MMAManager
             // 시스템 초기화 확인
             InitializeSystems();
             LoadGameState();
-            ShowGameSetupScreen();
+            InitializeUI();
         }
 
         private void InitializeSystems()
@@ -73,6 +73,19 @@ namespace MMAManager
                 Debug.LogWarning("[MainGameManager] TrainingSystem 인스턴스가 없습니다.");
             }
 
+            // UMA 시스템 초기화
+            if (UMAFighterGenerator.Instance == null)
+            {
+                var umaGenObj = new GameObject("UMAFighterGenerator");
+                umaGenObj.AddComponent<UMAFighterGenerator>();
+            }
+
+            if (FighterPortraitRenderer.Instance == null)
+            {
+                var portraitObj = new GameObject("FighterPortraitRenderer");
+                portraitObj.AddComponent<FighterPortraitRenderer>();
+            }
+
             Debug.Log("[MainGameManager] 모든 시스템 초기화 완료");
         }
 
@@ -83,15 +96,36 @@ namespace MMAManager
             Debug.Log("[MainGameManager] 새로운 경영 시작 준비 완료");
         }
 
-        private void ShowGameSetupScreen()
+        private void InitializeUI()
         {
-            if (gameSetupScreenPrefab != null)
+            // Ensure FighterDatabase exists
+            if (FighterDatabase.Instance == null)
             {
-                GameObject screen = Instantiate(gameSetupScreenPrefab);
-                DontDestroyOnLoad(screen);
-
-                Debug.Log("[MainGameManager] Game Setup 화면 표시");
+                var dbObj = new GameObject("FighterDatabase");
+                dbObj.AddComponent<FighterDatabase>();
             }
+
+            // Create UIManager
+            if (UIManager.Instance == null)
+            {
+                var uiObj = new GameObject("UIManager");
+                uiObj.AddComponent<UIManager>();
+            }
+
+            // Create screens
+            var mainMenu = new GameObject("MainMenuScreen").AddComponent<MainMenuScreen>();
+            var fighterList = new GameObject("FighterListScreen").AddComponent<FighterListScreen>();
+            var fighterDetail = new GameObject("FighterDetailScreen").AddComponent<FighterDetailScreen>();
+
+            // Register screens
+            UIManager.Instance.RegisterScreen("MainMenu", mainMenu);
+            UIManager.Instance.RegisterScreen("FighterList", fighterList);
+            UIManager.Instance.RegisterScreen("FighterDetail", fighterDetail);
+
+            // Show main menu
+            UIManager.Instance.ShowScreen("MainMenu");
+
+            Debug.Log("[MainGameManager] UI 초기화 완료");
         }
 
         /// <summary>

@@ -293,16 +293,13 @@ namespace MMAManager.UI
         {
             return weightClass switch
             {
-                WeightClass.Atomweight => "아톰급 (105lbs)",
-                WeightClass.Strawweight => "스트로급 (115lbs)",
                 WeightClass.Flyweight => "플라이급 (125lbs)",
                 WeightClass.Bantamweight => "밴텀급 (135lbs)",
                 WeightClass.Featherweight => "페더급 (145lbs)",
-                WeightClass.Lightweight => "라급 (155lbs)",
+                WeightClass.Lightweight => "라이트급 (155lbs)",
                 WeightClass.Welterweight => "웰터급 (170lbs)",
                 WeightClass.Middleweight => "미들급 (185lbs)",
                 WeightClass.LightHeavyweight => "라이트헤비급 (205lbs)",
-                WeightClass.Cruiserweight => "크루저급 (225lbs)",
                 WeightClass.Heavyweight => "헤비급 (265lbs)",
                 _ => "알 수 없음"
             };

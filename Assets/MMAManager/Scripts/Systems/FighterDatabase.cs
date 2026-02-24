@@ -42,6 +42,40 @@ namespace MMAManager.Systems
         {
             fighterDict = new Dictionary<string, Fighter>();
             LoadFighters();
+
+            // Auto-generate initial roster if empty
+            if (allFighters.Count == 0)
+                GenerateInitialRoster();
+        }
+
+        private void GenerateInitialRoster()
+        {
+            // Generate 10 fighters across various weight classes
+            WeightClass[] classes = {
+                WeightClass.Flyweight, WeightClass.Bantamweight,
+                WeightClass.Featherweight, WeightClass.Lightweight,
+                WeightClass.Lightweight, WeightClass.Welterweight,
+                WeightClass.Welterweight, WeightClass.Middleweight,
+                WeightClass.LightHeavyweight, WeightClass.Heavyweight
+            };
+
+            for (int i = 0; i < classes.Length; i++)
+            {
+                var fighter = GenerateRandomFighter(classes[i]);
+                fighter.RandomizeStats();
+
+                // Give some fighters a record
+                int fakeWins = UnityEngine.Random.Range(0, 8);
+                int fakeLosses = UnityEngine.Random.Range(0, 4);
+                for (int w = 0; w < fakeWins; w++)
+                    fighter.AddWin(UnityEngine.Random.value < 0.3f, UnityEngine.Random.value < 0.15f);
+                for (int l = 0; l < fakeLosses; l++)
+                    fighter.AddLoss();
+
+                AddFighter(fighter);
+            }
+
+            Debug.Log($"[FighterDatabase] Generated initial roster: {allFighters.Count} fighters");
         }
         #endregion
 
@@ -236,13 +270,7 @@ namespace MMAManager.Systems
         #endregion
 
         #region Debug
-        private void OnGUI()
-        {
-            if (Debug.isDebugBuild)
-            {
-                GUILayout.Label($"Fighters: {allFighters.Count}/{maxFighters}");
-            }
-        }
+        // Debug GUI disabled - use FighterListScreen instead
         #endregion
     }
 
