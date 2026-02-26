@@ -296,20 +296,16 @@ namespace MMAManager.UI
                 barBgRect.offsetMax = Vector2.zero;
                 barBg.AddComponent<Image>().color = new Color(0.2f, 0.2f, 0.25f);
 
-                // Bar fill
+                // Bar fill (앵커 기반 - anchorMax.x로 크기 조절)
                 var barFill = new GameObject($"BarFill_{i}");
                 barFill.transform.SetParent(barBg.transform, false);
                 var fillRect = barFill.AddComponent<RectTransform>();
                 fillRect.anchorMin = Vector2.zero;
-                fillRect.anchorMax = Vector2.one;
+                fillRect.anchorMax = new Vector2(0.5f, 1f); // 기본 50%
                 fillRect.offsetMin = Vector2.zero;
                 fillRect.offsetMax = Vector2.zero;
 
                 var fillImg = barFill.AddComponent<Image>();
-                fillImg.type = Image.Type.Filled;
-                fillImg.fillMethod = Image.FillMethod.Horizontal;
-                fillImg.fillOrigin = 0;
-                fillImg.fillAmount = 0.5f;
                 fillImg.color = Color.green;
                 statBars[i] = fillImg;
 
@@ -361,20 +357,16 @@ namespace MMAManager.UI
             bgRect.offsetMax = Vector2.zero;
             barBg.AddComponent<Image>().color = new Color(0.2f, 0.2f, 0.25f);
 
-            // Bar fill
+            // Bar fill (앵커 기반)
             var fill = new GameObject($"{label}Fill");
             fill.transform.SetParent(barBg.transform, false);
             var fillRect = fill.AddComponent<RectTransform>();
             fillRect.anchorMin = Vector2.zero;
-            fillRect.anchorMax = Vector2.one;
+            fillRect.anchorMax = new Vector2(1f, 1f);
             fillRect.offsetMin = Vector2.zero;
             fillRect.offsetMax = Vector2.zero;
 
             bar = fill.AddComponent<Image>();
-            bar.type = Image.Type.Filled;
-            bar.fillMethod = Image.FillMethod.Horizontal;
-            bar.fillOrigin = 0;
-            bar.fillAmount = 1f;
             bar.color = barColor;
 
             // Value
@@ -467,18 +459,18 @@ namespace MMAManager.UI
             };
             for (int i = 0; i < 8; i++)
             {
-                statBars[i].fillAmount = stats[i] / 100f;
+                SetBarFill(statBars[i], stats[i] / 100f);
                 statBars[i].color = GetStatColor(stats[i]);
                 statValueTexts[i].text = stats[i].ToString();
                 statValueTexts[i].color = GetStatColor(stats[i]);
             }
 
             // Condition
-            healthBar.fillAmount = f.Health / 100f;
+            SetBarFill(healthBar, f.Health / 100f);
             healthValueText.text = f.Health.ToString();
-            fatigueBar.fillAmount = f.Fatigue / 100f;
+            SetBarFill(fatigueBar, f.Fatigue / 100f);
             fatigueValueText.text = f.Fatigue.ToString();
-            conditionBar.fillAmount = f.Condition / 100f;
+            SetBarFill(conditionBar, f.Condition / 100f);
             conditionValueText.text = f.Condition.ToString();
 
             // Contract
@@ -537,6 +529,12 @@ namespace MMAManager.UI
             card.AddComponent<Image>().color = CardColor;
             card.AddComponent<LayoutElement>().preferredHeight = height;
             return card;
+        }
+
+        private void SetBarFill(Image bar, float ratio)
+        {
+            var rect = bar.GetComponent<RectTransform>();
+            rect.anchorMax = new Vector2(Mathf.Clamp01(ratio), 1f);
         }
 
         private void CreateSectionLabel(Transform parent, string text,
